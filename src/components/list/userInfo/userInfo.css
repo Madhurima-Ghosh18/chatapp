@@ -1,0 +1,88 @@
+:root {
+  --primary-bg: rgba(17, 25, 40, 0.6);
+  --primary-focus: rgba(31, 142, 241, 0.5);
+  --primary-button-bg: #1f8ef1;
+  --primary-button-hover-bg: #1a7fd8;
+  --logout-button-bg: #0b3d91;
+  --logout-button-hover-bg: #091f52;
+  --toggle-button-bg: white;
+  --toggle-button-hover-bg: #f0f0f0;
+}
+
+.light-theme {
+  --primary-bg: rgba(240, 240, 240, 0.6);
+  --primary-focus: rgba(135, 206, 235, 0.5);
+  --primary-button-bg: #87ceeb;
+  --primary-button-hover-bg: #4682b4;
+  --logout-button-bg: #1f8ef1;
+  --logout-button-hover-bg: #4682b4;
+  --toggle-button-bg: transparent;
+  --toggle-button-hover-bg: rgba(12, 22, 41, 0.1);
+}
+
+.userInfo {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.icons {
+  display: flex;
+  gap: 20px;
+}
+
+.icons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.icons button img {
+  width: 25px;
+  height: 25px;
+}
+
+.icons button:hover {
+  background-color: rgba(12, 22, 41, 0.1);
+  transform: scale(1.1);
+}
+
+.logout {
+  padding: 10px 20px;
+  background-color: var(--logout-button-bg);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout:hover {
+  background-color: var(--logout-button-hover-bg);
+}
+
+/* Specific styles for the toggle button */
+.icons button.toggle-theme {
+  background-color: var(--toggle-button-bg);
+}
+
+.icons button.toggle-theme:hover {
+  background-color: var(--toggle-button-hover-bg);
+}

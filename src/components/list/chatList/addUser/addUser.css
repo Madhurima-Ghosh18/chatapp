@@ -1,0 +1,108 @@
+:root {
+  --background-color: rgba(17, 25, 40, 0.781);
+  --input-bg: rgba(17, 25, 40, 0.3);
+  --input-hover-bg: rgba(31, 142, 241, 0.3);
+  --button-bg: #1a73e8;
+  --button-hover-bg: #4169e1;
+  --error-color: rgb(196, 104, 104);
+}
+
+.light-theme {
+  --background-color: rgba(255, 255, 255, 0.9);
+  --input-bg: rgba(240, 240, 240, 0.8);
+  --input-hover-bg: rgba(135, 206, 235, 0.3);
+  --button-bg: #87ceeb;
+  --button-hover-bg: #4682b4;
+  --error-color: rgb(220, 20, 60);
+}
+
+.addUser {
+  width: max-content;
+  height: max-content;
+  padding: 30px;
+  background-color: var(--background-color);
+  border-radius: 10px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+  form {
+    display: flex;
+    gap: 20px;
+
+    input {
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+
+      &:hover {
+        background-color: var(--input-hover-bg);
+        border-color: var(--button-bg);
+      }
+    }
+
+    button {
+      padding: 20px;
+      border-radius: 10px;
+      background-color: var(--button-bg);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+
+      &:hover {
+        background-color: var(--button-hover-bg);
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .user {
+    margin-top: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .detail {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--border-color);
+      }
+    }
+
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      background-color: var(--button-bg);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+
+      &:hover {
+        background-color: var(--button-hover-bg);
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .error {
+    color: var(--error-color);
+    font-size: 14px;
+    margin-top: 10px;
+  }
+}
