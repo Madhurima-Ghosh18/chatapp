@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
+import '../../theme.css';
 import "./detail.css";
 import { db } from "../../lib/firebase";
 import { useChatStore } from "../../lib/chatStore";
 import { useUserStore } from "../../lib/userStore";
-import { doc, arrayRemove, arrayUnion, updateDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { useTheme } from "../../ThemeContext";
 
 const Detail = () => {
+  const { theme } = useTheme();
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock, setScrollToMessageTimestamp, setMessages } = useChatStore();
   const { currentUser } = useUserStore();
   const [sharedPhotos, setSharedPhotos] = useState([]);
+  const [sharedDocuments, setSharedDocuments] = useState([]);
   const [showPhotos, setShowPhotos] = useState(false);
+  const [showDocuments, setShowDocuments] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [lastSeen, setLastSeen] = useState(null);
+  const { clearChatMessages } = useChatStore();
+
+  let photocnt=1;
+ 
 
   useEffect(() => {
     if (chatId) {
@@ -22,12 +31,22 @@ const Detail = () => {
             .filter(message => message.img)
             .map(message => ({
               url: message.img,
-              name: `photo_${new Date(message.createdAt.toDate()).toISOString()}.png`,
+              name: `photo_${photocnt++}.png`,
               timestamp: message.createdAt.toDate().getTime()
             }))
-            .reverse()
-            .slice(0, 5);
+            .reverse();
+
+          const documents = data.messages
+            .filter(message => message.doc)
+            .map(message => ({
+              url: message.doc,
+              name: message.docName || `doc_${new Date(message.createdAt.toDate()).toISOString()}.pdf`,
+              timestamp: message.createdAt.toDate().getTime()
+            }))
+            .reverse();
+
           setSharedPhotos(photos);
+          setSharedDocuments(documents);
         }
       });
 
@@ -72,62 +91,29 @@ const Detail = () => {
     }
   };
 
-  const isBlockButtonDisabled = () => {
-    return isCurrentUserBlocked;
-  };
+  const isBlockButtonDisabled = () => isCurrentUserBlocked;
 
-  const togglePhotos = () => {
-    setShowPhotos(prev => !prev);
-  };
-
-  const toggleOptions = () => {
-    setShowOptions(prev => !prev);
-  };
+  const togglePhotos = () => setShowPhotos(prev => !prev);
+  const toggleDocuments = () => setShowDocuments(prev => !prev);
+  const toggleOptions = () => setShowOptions(prev => !prev);
 
   const handleClearChat = async () => {
-    if (!chatId) {
-      console.error("Cannot clear chat: chatId is not defined");
-      alert("Failed to clear chat: Chat ID is missing.");
-      return;
-    }
-
     try {
-      const chatRef = doc(db, "chats", chatId);
-      
-      console.log("Updating document...");
-      await updateDoc(chatRef, {
-        messages: [],
-      });
-
-      console.log("Document updated successfully. Updating local state...");
-
-      // Update local state
-      setMessages([]);
-      
-      console.log("Local state updated. Closing options menu...");
+      await useChatStore.getState().clearChatMessages(); // Call clearChatMessages directly from the store
       setShowOptions(false);
-      
-      console.log("Chat clear process completed successfully.");
- 
     } catch (error) {
       console.error("Error in clear chat process:", error);
     }
   };
+  
 
-  const handlePhotoClick = (timestamp) => {
-    setScrollToMessageTimestamp(timestamp);
-  };
+  const handlePhotoClick = (timestamp) => setScrollToMessageTimestamp(timestamp);
+  const handleDocumentClick = (timestamp) => setScrollToMessageTimestamp(timestamp);
 
   const formatLastSeen = (date) => {
-    if (isCurrentUserBlocked) {
-      return "Last seen: Unknown";
-    }
-    if (isReceiverBlocked) {
-      return "Last seen: Unavailable";
-    }
-
+    if (isCurrentUserBlocked) return "Last seen: Unknown";
+    if (isReceiverBlocked) return "Last seen: Unavailable";
     if (!date) return "Last seen: Unknown";
-
 
     const now = new Date();
     const diff = now - date;
@@ -147,7 +133,6 @@ const Detail = () => {
     }
   };
 
-  // If there's no chat selected, render a placeholder
   if (!chatId || !user) {
     return (
       <div className="detail">
@@ -157,6 +142,7 @@ const Detail = () => {
   }
 
   return (
+    <div className={`Detail ${theme}`}>
     <div className="detail">
       <div className="user">
         <img src={user?.avatar || "./avatar.png"} alt="" />
@@ -177,7 +163,7 @@ const Detail = () => {
         </div>
         <div className="option">
           <div className="title" onClick={togglePhotos}>
-            <span>Shared photos</span>
+            <span>Shared Photos</span>
             <img src={showPhotos ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
           </div>
           {showPhotos && (
@@ -194,21 +180,43 @@ const Detail = () => {
               ) : (
                 <div className="photoItem">
                   <div className="photoDetail empty">
-                    <span>No photo</span>
+                    <span>No photos</span>
                   </div>
                 </div>
               )}
             </div>
           )}
         </div>
-        <button 
-          className="blockUser" 
-          onClick={handleBlock} 
-          disabled={isBlockButtonDisabled()}
-        >
+        <div className="option">
+          <div className="title" onClick={toggleDocuments}>
+            <span>Shared Documents</span>
+            <img src={showDocuments ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
+          </div>
+          {showDocuments && (
+            <div className="documents">
+              {sharedDocuments.length > 0 ? (
+                sharedDocuments.map((doc, index) => (
+                  <div className="documentItem" key={index} onClick={() => handleDocumentClick(doc.timestamp)}>
+                    <div className="documentDetail">
+                      <span>{doc.name}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="documentItem">
+                  <div className="documentDetail empty">
+                    <span>No documents</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <button className="blockUser" onClick={handleBlock} disabled={isBlockButtonDisabled()}>
           {getBlockButtonText()}
         </button>
       </div>
+    </div>
     </div>
   );
 };

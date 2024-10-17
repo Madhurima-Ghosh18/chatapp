@@ -1,49 +1,30 @@
-:root {
-  --light-bg: #ffffff;
-  --light-text: #333333;
-  --light-input-bg: #f0f0f0;
-  --light-input-focus: rgba(31, 142, 241, 0.5);
-  --light-button-bg: #1f8ef1;
-  --light-button-hover-bg: #1a7fd8;
-  --dark-bg: #1a1a1a;
-  --dark-text: #e0e0e0;
-  --dark-input-bg: #2c2c2c;
-  --dark-input-focus: rgba(31, 142, 241, 0.5);
-  --dark-button-bg: #1f8ef1;
-  --dark-button-hover-bg: #1a7fd8;
-  --light-toggle-bg: #f0f0f0;
-  --light-toggle-color: #333333;
-  --dark-toggle-bg: #ffffff;
-  --dark-toggle-color: #1a1a1a;
-}
-
 .login {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 100px;
+  justify-content: center;
   padding: 20px;
-  box-sizing: border-box;
+  background-color: var(--bg-gradient-start);
+  color: var(--text-color);
 }
 
-.light-theme .login {
-  background-color: var(--light-bg);
-  color: var(--light-text);
-}
-
-.dark-theme .login {
-  background-color: var(--dark-bg);
-  color: var(--dark-text);
+.login-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .login .item {
-  flex: 1;
+  flex: 0 1 45%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  width: 45vw;
 }
 
 .login .item form {
@@ -57,27 +38,19 @@
 }
 
 .login .item form input {
-  padding: 20px;
+  padding: 15px;
   border: none;
   outline: none;
   border-radius: 5px;
   width: 100%;
   font-size: 1rem;
   transition: all 0.3s ease;
-}
-
-.light-theme .login .item form input {
-  background-color: var(--light-input-bg);
-  color: var(--light-text);
-}
-
-.dark-theme .login .item form input {
-  background-color: var(--dark-input-bg);
-  color: var(--dark-text);
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .login .item form input:focus {
-  box-shadow: 0 0 0 2px var(--light-input-focus);
+  box-shadow: 0 0 0 2px var(--primary-focus);
 }
 
 .login .item form label {
@@ -109,7 +82,7 @@
 }
 
 .login .item form button {
-  padding: 20px;
+  padding: 15px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -117,29 +90,14 @@
   width: 100%;
   font-size: 1rem;
   transition: all 0.3s ease;
-}
-
-.light-theme .login .item form button {
-  background-color: var(--light-button-bg);
-  color: var(--light-text);
-}
-
-.dark-theme .login .item form button {
-  background-color: var(--dark-button-bg);
-  color: var(--dark-text);
+  background-color: var(--button-bg);
+  color: white;
 }
 
 .login .item form button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.light-theme .login .item form button:hover:not(:disabled) {
-  background-color: var(--light-button-hover-bg);
-}
-
-.dark-theme .login .item form button:hover:not(:disabled) {
-  background-color: var(--dark-button-hover-bg);
+  box-shadow: 0 4px 8px var(--hover-shadow);
+  background-color: var(--button-hover-bg);
 }
 
 .login .item form button:disabled {
@@ -163,40 +121,19 @@
   transition: all 0.3s ease;
   width: 50px;
   height: 50px;
-}
-
-.light-theme .theme-toggle {
-  background-color: var(--light-toggle-bg);
-  color: var(--light-toggle-color);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.dark-theme .theme-toggle {
-  background-color: var(--dark-toggle-bg);
-  color: var(--dark-toggle-color);
-  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.2);
+  background-color: var(--toggle-button-bg);
+  color: var(--text-color);
 }
 
 .theme-toggle:hover {
   transform: scale(1.1);
-}
-
-.light-theme .theme-toggle:hover {
-  background-color: var(--light-input-bg);
-}
-
-.dark-theme .theme-toggle:hover {
-  background-color: #f0f0f0;
+  background-color: var(--toggle-button-hover-bg);
 }
 
 .separator {
   width: 1px;
   height: 400px;
-  background-color: #ccc;
-}
-
-.dark-theme .separator {
-  background-color: #444;
+  background-color: var(--border-color);
 }
 
 .forgot-password {
@@ -210,7 +147,29 @@
 }
 
 .error {
-  color: #ff4d4d;
+  color: var(--error-color);
   font-size: 0.875rem;
   margin-top: -10px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .login {
+    padding: 10px;
+  }
+
+  .login .item form {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .login .item {
+    width: 100%;
+  }
 }

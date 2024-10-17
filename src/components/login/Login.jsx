@@ -1,30 +1,19 @@
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "../../theme.css";
 import "./login.css";
 import { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import upload from "../../lib/upload";
+import { useTheme } from "../../ThemeContext";
 
 const Login = () => {
+  const { theme, toggleTheme } = useTheme();
   const [avatar, setAvatar] = useState({ file: null, url: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light-theme');
-
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
-    document.documentElement.className = theme;
-  }, [theme]);
-
-  useEffect(() => {
-    document.body.className = theme === "light" ? "light-theme" : "dark-theme";
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
 
   const handleAvatar = (e) => {
     if (e.target.files[0]) {
@@ -124,10 +113,12 @@ const Login = () => {
   };
 
   return (
+    <div className={`Login ${theme}`}>
     <div className="login">
-      <button className="theme-toggle" onClick={toggleTheme}>
-          <img src={theme === "light" ? "./moon.png" : "./sun.png"} alt="Toggle Theme" />
-      </button>
+    <button className="theme-toggle" onClick={toggleTheme}>
+          <img src={theme === "light-theme" ? "./moon.png" : "./sun.png"} alt="Toggle Theme" />
+        </button>
+        <div className="login-content">
       <div className="item">
         <h2>Welcome back!</h2>
         <form onSubmit={handleLogin}>
@@ -172,6 +163,8 @@ const Login = () => {
           <button disabled={loading}>{loading ? "Loading" : "Sign Up"}</button>
         </form>
       </div>
+    </div>
+    </div>
     </div>
   );
 };

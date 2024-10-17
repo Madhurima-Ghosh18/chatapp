@@ -1,4 +1,3 @@
-// Modify App.js
 import { useEffect, useState } from "react";
 import Chat from "./components/chat/Chat";
 import Detail from "./components/detail/Detail";
@@ -10,9 +9,10 @@ import { auth, db } from "./lib/firebase";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useUserStore } from "./lib/userStore";
 import { useChatStore } from "./lib/chatStore";
+import { ThemeProvider } from "./ThemeContext";
 
 const App = () => {
-  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
+  const { currentUser, isLoading, fetchUserInfo} = useUserStore();
   const { isChatSelected } = useChatStore();
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
@@ -46,21 +46,25 @@ const App = () => {
     };
   }, [fetchUserInfo, currentUser]);
 
+  
+
   if (isLoading) return <h2 className="loading">Loading...</h2>;
 
   return (
-    <div className="container">
-      {currentUser ? (
-        <>
-          <List />
-          {isChatSelected && <Chat />}
-          {isChatSelected && <Detail />}
-        </>
-      ) : (
-        <Login />
-      )}
-      <Notification />
-    </div>
+    <ThemeProvider>
+      <div className={`container ${currentUser ? 'app-layout' : 'login-layout'}`}>
+        {currentUser ? (
+          <>
+            <List />
+            {isChatSelected && <Chat />}
+            {isChatSelected && <Detail />}
+          </>
+        ) : (
+          <Login />
+        )}
+        <Notification />
+      </div>
+    </ThemeProvider>
   );
 };
 

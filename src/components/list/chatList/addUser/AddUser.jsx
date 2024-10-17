@@ -1,3 +1,4 @@
+import "../../../../theme.css";
 import "./addUser.css";
 import { db } from "../../../../lib/firebase";
 import {
@@ -14,8 +15,10 @@ import {
 } from "firebase/firestore";
 import { useUserStore } from "../../../../lib/userStore";
 import { useState } from "react";
+import { useTheme } from "../../../../ThemeContext";
 
 const AddUser = () => {
+  const { theme } = useTheme();
   const [user, setUser] = useState(null);
   const [searchError, setSearchError] = useState("");
   const { currentUser } = useUserStore();
@@ -26,7 +29,7 @@ const AddUser = () => {
     const username = formData.get("username");
 
     if (username === currentUser.username) {
-      setSearchError("You cannot add yourself");
+      setSearchError("You can't add yourself");
       setUser(null);
       return;
     }
@@ -38,7 +41,7 @@ const AddUser = () => {
       if (!querySnapShot.empty) {
         const foundUser = querySnapShot.docs[0].data();
         if (foundUser.id === currentUser.id) {
-          setSearchError("You cannot add yourself");
+          setSearchError("You can't add yourself");
           setUser(null);
         } else {
           // Check if chat already exists
@@ -121,6 +124,7 @@ const AddUser = () => {
   };
 
   return (
+    <div className={`AddUser ${theme}`}>
     <div className="addUser">
       <form onSubmit={handleSearch}>
         <input type="text" placeholder="Username" name="username" />
@@ -136,6 +140,7 @@ const AddUser = () => {
           <button onClick={handleAdd}>Add User</button>
         </div>
       )}
+    </div>
     </div>
   );
 };

@@ -1,25 +1,3 @@
-:root {
-  --bg-gradient-start: #F0E6D2; /* Light theme default */
-  --bg-gradient-end: #87CEEB; /* Light theme default */
-  --text-color: #333333;
-  --container-bg: rgba(255, 255, 255, 0.8);
-  --border-color: rgba(0, 0, 0, 0.1);
-  --loading-bg: rgba(135, 206, 235, 0.8);
-  --link-color: #0000FF;
-}
-
-.dark-theme {
-  --bg-gradient-start: #334455; /* Dark theme */
-  --bg-gradient-end: #282828; /* Dark theme */
-  --text-color: #E0E0E0;
-  --container-bg: linear-gradient(145deg, rgba(50, 50, 50, 0.9), rgba(30, 30, 30, 0.9));
-  --border-color: rgba(255, 255, 255, 0.2);
-  --loading-bg: rgba(51, 68, 85, 0.8);
-  --link-color: #64FFDA;
-}
-
-
-
 * {
   margin: 0;
   padding: 0;
@@ -32,38 +10,44 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
   color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
 }
 
+
 .container {
-  width: 95vw;
+  min-width: 100%;
   height: 95vh;
-  max-width: 1400px;
+  max-width: none;
   background: var(--container-bg);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   border: 1px solid var(--border-color);
+  transition: background-color 0.3s, border-color 0.3s; 
   display: flex;
+  
+}
+.app-layout {
+  display: flex;
+  flex: 1;
   overflow: hidden;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 
+.login-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+
 .loading {
-  color: black; /* Text color */
-  font-size: 36px; /* Font size */
+  color: var(--text-color);
+  font-size: 36px;
 }
 
 a {
   color: var(--link-color);
   transition: color 0.3s;
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    height: auto;
-    min-height: 95vh;
-  }
 }

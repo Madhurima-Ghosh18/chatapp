@@ -1,118 +1,99 @@
-:root {
-  --scrollbar-thumb: rgba(26, 54, 54, 0.7);
-  --scrollbar-track: rgba(26, 54, 54, 0.5);
-  --search-bar-bg: rgba(17, 25, 40, 0.5);
-  --search-bar-text: rgba(255, 255, 255, 0.897);
-  --add-bg: rgba(26, 54, 54, 0.5);
-  --add-hover-bg: rgba(31, 142, 241, 0.5);
-  --item-hover-bg: rgba(255, 255, 255, 0.1);
-  --border-color: #dddddd35;
-}
-
-.light-theme {
-  --scrollbar-thumb: rgba(135, 206, 235, 0.7);
-  --scrollbar-track: rgba(135, 206, 235, 0.5);
-  --search-bar-bg: rgba(255, 255, 255, 0.8);
-  --search-bar-text: rgba(0, 0, 0, 0.897);
-  --add-bg: rgba(135, 206, 235, 0.5);
-  --add-hover-bg: rgba(31, 142, 241, 0.8);
-  --item-hover-bg: rgba(0, 0, 0, 0.1);
-  --border-color: #aaaaaa35;
-}
-
 .chatList {
-  flex: 1;
-  min-width: 250px;
-  max-width: 350px;
+  flex:1;
+  height:100%;
   overflow-y: scroll;
   border-right: 1px solid var(--border-color);
-  
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-  
-  &:hover {
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-  }
-  
-  .search {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    
-    .searchBar {
-      flex: 1;
-      background-color: var(--search-bar-bg);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      border-radius: 10px;
-      padding: 10px;
-      
-      input {
-        background-color: transparent;
-        border: none;
-        outline: none;
-        color: var(--search-bar-text);
-        flex: 1;
-      }
-      
-      img {
-        width: 20px;
-        height: 20px;
-      }
-    }
-    
-    .add {
-      width: 36px;
-      height: 36px;
-      background-color: var(--add-bg);
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      
-      &:hover {
-        background-color: var(--add-hover-bg);
-        transform: scale(1.05);
-      }
-    }
-  }
-  
-  .item {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background-color: var(--item-hover-bg);
-      transform: translateX(5px);
-    }
-    
-    img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-    
-    .texts {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      
-      span {
-        font-weight: 500;
-      }
-      
-      p {
-        font-size: 14px;
-        font-weight: 300;
-      }
-    }
-  }
+}
+
+.chatList:hover {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.chatList .search {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.chatList .search .searchBar {
+  flex: 1;
+  background-color: var(--search-bar-bg);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.chatList .search .searchBar input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.chatList .search .searchBar img {
+  width: 20px;
+  height: 20px;
+}
+
+.chatList .search .add {
+  width: 36px;
+  height: 36px;
+  background-color: var(--add-bg);
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.chatList .search .add:hover {
+  background-color: var(--add-hover-bg);
+  transform: scale(1.05);
+}
+
+.chatList .item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  overflow: hidden; /* Prevents content from spilling out of its box */
+  text-overflow: ellipsis; /* Gracefully handle longer text */
+  white-space: nowrap; /* Keep texts in a single line */
+}
+
+.chatList .item:hover {
+  background-color: var(--item-hover-bg);
+  transform: translateX(5px);
+}
+
+.chatList .item img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.chatList .item .texts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chatList .item .texts span {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.chatList .item .texts p {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-color);
 }

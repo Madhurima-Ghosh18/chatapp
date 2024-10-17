@@ -1,30 +1,12 @@
-:root {
-  --primary-bg: rgba(17, 25, 40, 0.6);
-  --primary-focus: rgba(31, 142, 241, 0.5);
-  --primary-button-bg: #1f8ef1;
-  --primary-button-hover-bg: #1a7fd8;
-  --logout-button-bg: #0b3d91;
-  --logout-button-hover-bg: #091f52;
-  --toggle-button-bg: white;
-  --toggle-button-hover-bg: #f0f0f0;
-}
-
-.light-theme {
-  --primary-bg: rgba(240, 240, 240, 0.6);
-  --primary-focus: rgba(135, 206, 235, 0.5);
-  --primary-button-bg: #87ceeb;
-  --primary-button-hover-bg: #4682b4;
-  --logout-button-bg: #1f8ef1;
-  --logout-button-hover-bg: #4682b4;
-  --toggle-button-bg: transparent;
-  --toggle-button-hover-bg: rgba(12, 22, 41, 0.1);
-}
-
-.userInfo {
+.userinfo {
   padding: 20px;
+  flex-shrink: 0;
+  width:100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: var(--userinfo-bg);
+  color: var(--text-color);
 }
 
 .user {
@@ -43,6 +25,7 @@
 .icons {
   display: flex;
   gap: 20px;
+  position: relative;
 }
 
 .icons button {
@@ -51,7 +34,7 @@
   cursor: pointer;
   padding: 10px;
   border-radius: 50%;
-  transition: background-color 0.3s, transform 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .icons button img {
@@ -59,30 +42,54 @@
   height: 25px;
 }
 
+.icons button{
+  background-color: var(--icon-bg);
+}
+
 .icons button:hover {
-  background-color: rgba(12, 22, 41, 0.1);
-  transform: scale(1.1);
+  background-color: var(--icon-hover-bg);
 }
 
-.logout {
-  padding: 10px 20px;
-  background-color: var(--logout-button-bg);
-  color: white;
-  border: none;
-  border-radius: 5px;
+.dropdown-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: var(--dropdown-bg);
+  padding: 5px 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  width: 120px;
+  border-radius: 8px;
+}
+
+.dropdown-icon {
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  padding-left: 2px;
+  gap: 10px; 
+}
+
+.dropdown-icon img {
+  width: 20px;
+  height: 20px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.logout:hover {
-  background-color: var(--logout-button-hover-bg);
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Specific styles for the toggle button */
-.icons button.toggle-theme {
-  background-color: var(--toggle-button-bg);
-}
-
-.icons button.toggle-theme:hover {
-  background-color: var(--toggle-button-hover-bg);
+.dropdown-menu button:hover {
+  background-color: var(--dropdown-hover-bg);
 }
