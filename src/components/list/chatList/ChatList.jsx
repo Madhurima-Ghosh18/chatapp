@@ -101,12 +101,24 @@ const ChatList = () => {
     return lastMessage.text || "";
   };
 
-  const filteredChats = chats
+  const sortedChats = chats
     .filter(c => c.user.username.toLowerCase().includes(input.toLowerCase()))
     .sort((a, b) => {
-      const aTime = a.lastMessage?.createdAt?.toMillis() || a.createdAt?.toMillis() || 0;
-      const bTime = b.lastMessage?.createdAt?.toMillis() || b.createdAt?.toMillis() || 0;
-      return bTime - aTime;
+      // First, sort by the creation time of the chat (for newly added users)
+      const aCreatedTime = a.createdAt?.toMillis() || 0;
+      const bCreatedTime = b.createdAt?.toMillis() || 0;
+      
+      // Then, sort by the last message time
+      const aLastMessageTime = a.lastMessage?.createdAt?.toMillis() || 0;
+      const bLastMessageTime = b.lastMessage?.createdAt?.toMillis() || 0;
+      
+      // If creation times are different, use them for sorting
+      if (aCreatedTime !== bCreatedTime) {
+        return bCreatedTime - aCreatedTime;
+      }
+      
+      // If creation times are the same, use last message times
+      return bLastMessageTime - aLastMessageTime;
     });
 
   return (
@@ -128,24 +140,18 @@ const ChatList = () => {
             onClick={() => setAddMode((prev) => !prev)}
           />
         </div>
-        {filteredChats.map(chat => (
+        {sortedChats.map(chat => (
           <div
             className={`item ${!chat.isSeen ? "unseen" : ""}`}
             key={chat.chatId}
             onClick={() => handleSelect(chat)}
           >
             <img
-              src={chat.user.blocked.includes(currentUser.id)
-                ? "./avatar.png"
-                : chat.user.avatar || "./avatar.png"}
+              src={chat.user.avatar || "./avatar.png"}
               alt="user avatar"
             />
             <div className="texts">
-              <span>
-                {chat.user.blocked.includes(currentUser.id)
-                  ? "User"
-                  : chat.user.username}
-              </span>
+              <span>{chat.user.username}</span>
               <p>{getLastMessagePreview(chat.lastMessage)}</p>
             </div>
           </div>

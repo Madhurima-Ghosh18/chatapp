@@ -9,7 +9,7 @@ import { useTheme } from "../../ThemeContext";
 
 const Detail = () => {
   const { theme } = useTheme();
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock, setScrollToMessageTimestamp, setMessages } = useChatStore();
+  const { chatId, user, isReceiverBlocked, isCurrentUserBlocked, changeBlock, setScrollToMessageTimestamp, setMessages } = useChatStore();
   const { currentUser } = useUserStore();
   const [sharedPhotos, setSharedPhotos] = useState([]);
   const [sharedDocuments, setSharedDocuments] = useState([]);
@@ -19,15 +19,18 @@ const Detail = () => {
   const [lastSeen, setLastSeen] = useState(null);
   const { clearChatMessages } = useChatStore();
 
-  let photocnt=1;
- 
+  let photocnt = 1;
 
   useEffect(() => {
     if (chatId) {
       const unsubscribe = onSnapshot(doc(db, "chats", chatId), (doc) => {
         const data = doc.data();
         if (data && data.messages) {
-          const photos = data.messages
+          const filteredMessages = data.messages.filter(message => 
+            !message.deletedFor || (!message.deletedFor.includes(currentUser.id) && !message.deletedFor.includes('everyone'))
+          );
+
+          const photos = filteredMessages
             .filter(message => message.img)
             .map(message => ({
               url: message.img,
@@ -36,7 +39,7 @@ const Detail = () => {
             }))
             .reverse();
 
-          const documents = data.messages
+          const documents = filteredMessages
             .filter(message => message.doc)
             .map(message => ({
               url: message.doc,
@@ -52,10 +55,10 @@ const Detail = () => {
 
       return () => unsubscribe();
     }
-  }, [chatId]);
+  }, [chatId, currentUser.id]);
 
   useEffect(() => {
-    if (user && user.id && !isCurrentUserBlocked) {
+    if (user && user.id && !isCurrentUserBlocked && !isReceiverBlocked) {
       const userDocRef = doc(db, "users", user.id);
       const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
@@ -66,7 +69,7 @@ const Detail = () => {
 
       return () => unsubscribe();
     }
-  }, [user, isCurrentUserBlocked]);
+  }, [user, isCurrentUserBlocked, isReceiverBlocked]);
 
   const handleBlock = async () => {
     if (!user) return;
@@ -82,16 +85,8 @@ const Detail = () => {
   };
 
   const getBlockButtonText = () => {
-    if (isCurrentUserBlocked) {
-      return "Something is Wrong!";
-    } else if (isReceiverBlocked) {
-      return "Unblock User";
-    } else {
-      return "Block User";
-    }
+    return isReceiverBlocked ? "Unblock User" : "Block User";
   };
-
-  const isBlockButtonDisabled = () => isCurrentUserBlocked;
 
   const togglePhotos = () => setShowPhotos(prev => !prev);
   const toggleDocuments = () => setShowDocuments(prev => !prev);
@@ -99,20 +94,24 @@ const Detail = () => {
 
   const handleClearChat = async () => {
     try {
-      await useChatStore.getState().clearChatMessages(); // Call clearChatMessages directly from the store
+      await useChatStore.getState().clearChatMessages();
       setShowOptions(false);
     } catch (error) {
       console.error("Error in clear chat process:", error);
     }
   };
-  
 
   const handlePhotoClick = (timestamp) => setScrollToMessageTimestamp(timestamp);
   const handleDocumentClick = (timestamp) => setScrollToMessageTimestamp(timestamp);
 
   const formatLastSeen = (date) => {
-    if (isCurrentUserBlocked) return "Last seen: Unknown";
-    if (isReceiverBlocked) return "Last seen: Unavailable";
+    if (isCurrentUserBlocked) {
+      return "Last seen: Unknown";
+    }
+    if (isReceiverBlocked) {
+      return "Last seen: Unavailable";
+    }
+
     if (!date) return "Last seen: Unknown";
 
     const now = new Date();
@@ -143,80 +142,80 @@ const Detail = () => {
 
   return (
     <div className={`Detail ${theme}`}>
-    <div className="detail">
-      <div className="user">
-        <img src={user?.avatar || "./avatar.png"} alt="" />
-        <h2>{user?.username}</h2>
-        <p>{formatLastSeen(lastSeen)}</p>
-      </div>
-      <div className="info">
-        <div className="option">
-          <div className="title" onClick={toggleOptions}>
-            <span>Chat Settings</span>
-            <img src={showOptions ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
-          </div>
-          {showOptions && (
-            <div className="options-menu">
-              <button className="clearChat" onClick={handleClearChat}>Clear Chat</button>
-            </div>
-          )}
+      <div className="detail">
+        <div className="user">
+          <img src={user?.avatar || "./avatar.png"} alt="" />
+          <h2>{user?.username}</h2>
+          <p>{formatLastSeen(lastSeen)}</p>
         </div>
-        <div className="option">
-          <div className="title" onClick={togglePhotos}>
-            <span>Shared Photos</span>
-            <img src={showPhotos ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
+        <div className="info">
+          <div className="option">
+            <div className="title" onClick={toggleOptions}>
+              <span>Chat Settings</span>
+              <img src={showOptions ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
+            </div>
+            {showOptions && (
+              <div className="options-menu">
+                <button className="clearChat" onClick={handleClearChat}>Clear Chat</button>
+              </div>
+            )}
           </div>
-          {showPhotos && (
-            <div className="photos">
-              {sharedPhotos.length > 0 ? (
-                sharedPhotos.map((photo, index) => (
-                  <div className="photoItem" key={index} onClick={() => handlePhotoClick(photo.timestamp)}>
-                    <div className="photoDetail">
-                      <img src={photo.url} alt="" />
-                      <span>{photo.name}</span>
+          <div className="option">
+            <div className="title" onClick={togglePhotos}>
+              <span>Shared Photos</span>
+              <img src={showPhotos ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
+            </div>
+            {showPhotos && (
+              <div className="photos">
+                {sharedPhotos.length > 0 ? (
+                  sharedPhotos.map((photo, index) => (
+                    <div className="photoItem" key={index} onClick={() => handlePhotoClick(photo.timestamp)}>
+                      <div className="photoDetail">
+                        <img src={photo.url} alt="" />
+                        <span>{photo.name}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="photoItem">
+                    <div className="photoDetail empty">
+                      <span>No photos</span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="photoItem">
-                  <div className="photoDetail empty">
-                    <span>No photos</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="option">
-          <div className="title" onClick={toggleDocuments}>
-            <span>Shared Documents</span>
-            <img src={showDocuments ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
+                )}
+              </div>
+            )}
           </div>
-          {showDocuments && (
-            <div className="documents">
-              {sharedDocuments.length > 0 ? (
-                sharedDocuments.map((doc, index) => (
-                  <div className="documentItem" key={index} onClick={() => handleDocumentClick(doc.timestamp)}>
-                    <div className="documentDetail">
-                      <span>{doc.name}</span>
+          <div className="option">
+            <div className="title" onClick={toggleDocuments}>
+              <span>Shared Documents</span>
+              <img src={showDocuments ? "./arrowUp.png" : "./arrowDown.png"} alt="" />
+            </div>
+            {showDocuments && (
+              <div className="documents">
+                {sharedDocuments.length > 0 ? (
+                  sharedDocuments.map((doc, index) => (
+                    <div className="documentItem" key={index} onClick={() => handleDocumentClick(doc.timestamp)}>
+                      <div className="documentDetail">
+                        <span>{doc.name}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="documentItem">
+                    <div className="documentDetail empty">
+                      <span>No documents</span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="documentItem">
-                  <div className="documentDetail empty">
-                    <span>No documents</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
+          <button className="blockUser" onClick={handleBlock}>
+            {getBlockButtonText()}
+          </button>
         </div>
-        <button className="blockUser" onClick={handleBlock} disabled={isBlockButtonDisabled()}>
-          {getBlockButtonText()}
-        </button>
       </div>
-    </div>
     </div>
   );
 };
