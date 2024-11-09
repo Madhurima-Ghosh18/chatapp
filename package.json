@@ -10,8 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cloudinary/url-gen": "^1.21.0",
+    "axios": "^1.7.7",
     "browser-image-compression": "^2.0.2",
+    "cloudinary": "^2.5.1",
+    "cloudinary-core": "^2.13.1",
+    "cloudinary-react": "^1.8.1",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
     "emoji-picker-react": "^4.11.1",
     "firebase": "^10.12.3",
     "heic2any": "^0.0.4",
