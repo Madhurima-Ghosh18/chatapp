@@ -12,43 +12,69 @@ import { useChatStore } from "./lib/chatStore";
 import { ThemeProvider } from "./ThemeContext";
 
 const App = () => {
-  const { currentUser, isLoading, fetchUserInfo} = useUserStore();
+  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
   const { isChatSelected } = useChatStore();
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   useEffect(() => {
+    let isSubscribed = true;
+
     const unSub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          await updateDoc(doc(db, "users", user.uid), {
-            lastSeen: serverTimestamp()
-          });
-          setJustLoggedIn(true);
-        } catch (error) {
-          console.error("Error updating last seen:", error);
-        }
-      } else {
-        if (currentUser) {
+      try {
+        // Handle sign in
+        if (user?.uid) {
+          const userDocRef = doc(db, "users", user.uid);
           try {
-            await updateDoc(doc(db, "users", currentUser.id), {
+            await updateDoc(userDocRef, {
+              lastSeen: serverTimestamp()
+            });
+            if (isSubscribed) {
+              setJustLoggedIn(true);
+            }
+          } catch (error) {
+            // Only log error if it's not a "document not found" error
+            if (error.code !== 'not-found') {
+              console.error("Error updating last seen:", error);
+            }
+          }
+        } 
+        // Handle sign out
+        else if (currentUser?.id) {
+          try {
+            const userDocRef = doc(db, "users", currentUser.id);
+            await updateDoc(userDocRef, {
               lastSeen: serverTimestamp()
             });
           } catch (error) {
-            console.error("Error updating last seen on logout:", error);
+            // Only log error if it's not a "document not found" error
+            if (error.code !== 'not-found') {
+              console.error("Error updating last seen on logout:", error);
+            }
           }
         }
+
+        // Always fetch user info, even if updates fail
+        if (isSubscribed) {
+          await fetchUserInfo(user?.uid);
+        }
+      } catch (error) {
+        console.error("Error in auth state change handler:", error);
       }
-      fetchUserInfo(user?.uid);
     });
 
     return () => {
+      isSubscribed = false;
       unSub();
     };
-  }, [fetchUserInfo, currentUser]);
+  }, [fetchUserInfo, currentUser?.id]); // Only depend on currentUser.id, not the whole object
 
-  
-
-  if (isLoading) return <h2 className="loading">Loading...</h2>;
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <h2 className="loading">Loading...</h2>
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider>

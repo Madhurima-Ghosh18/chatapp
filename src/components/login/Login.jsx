@@ -2,18 +2,20 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../theme.css";
 import "./login.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import upload from "../../lib/upload";
 import { useTheme } from "../../ThemeContext";
+import { useChatStore } from "../../lib/chatStore";
 
 const Login = () => {
   const { theme, toggleTheme } = useTheme();
   const [avatar, setAvatar] = useState({ file: null, url: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const clearSelectedChat = useChatStore(state => state.clearSelectedChat);
 
   const handleAvatar = (e) => {
     if (e.target.files[0]) {
@@ -77,6 +79,7 @@ const Login = () => {
         blocked: [],
       });
       await setDoc(doc(db, "userchats", res.user.uid), { chats: [] });
+      clearSelectedChat(); // Clear any selected chat on registration
       toast.success("Account created successfully!");
       
       window.location.reload();
@@ -103,6 +106,7 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
+      clearSelectedChat(); // Clear any selected chat on login
       toast.success("Success!");
     } catch (err) {
       console.log(err);
@@ -114,57 +118,57 @@ const Login = () => {
 
   return (
     <div className={`Login ${theme}`}>
-    <div className="login">
-    <button className="theme-toggle" onClick={toggleTheme}>
+      <div className="login">
+        <button className="theme-toggle" onClick={toggleTheme}>
           <img src={theme === "light-theme" ? "./moon.png" : "./sun.png"} alt="Toggle Theme" />
         </button>
         <div className="login-content">
-      <div className="item">
-        <h2>Welcome back!</h2>
-        <form onSubmit={handleLogin}>
-          <label htmlFor="login-email">Email</label>
-          <input type="email" id="login-email" placeholder="Email" name="email" aria-invalid={errors.email ? "true" : "false"} />
-          {errors.email && <span className="error">{errors.email}</span>}
-          
-          <label htmlFor="login-password">Password</label>
-          <input type="password" id="login-password" placeholder="Password" name="password" aria-invalid={errors.password ? "true" : "false"} />
-          {errors.password && <span className="error">{errors.password}</span>}
-          
-          <button disabled={loading}>{loading ? "Loading" : "Sign In"}</button>
-        </form>
-        <a href="#" className="forgot-password">Forgot Password?</a>
+          <div className="item">
+            <h2>Welcome back!</h2>
+            <form onSubmit={handleLogin}>
+              <label htmlFor="login-email">Email</label>
+              <input type="email" id="login-email" placeholder="Email" name="email" aria-invalid={errors.email ? "true" : "false"} />
+              {errors.email && <span className="error">{errors.email}</span>}
+              
+              <label htmlFor="login-password">Password</label>
+              <input type="password" id="login-password" placeholder="Password" name="password" aria-invalid={errors.password ? "true" : "false"} />
+              {errors.password && <span className="error">{errors.password}</span>}
+              
+              <button disabled={loading}>{loading ? "Loading" : "Sign In"}</button>
+            </form>
+            <a href="#" className="forgot-password">Forgot Password?</a>
+          </div>
+          <div className="separator"></div>
+          <div className="item">
+            <h2>Create an Account</h2>
+            <form onSubmit={handleRegister}>
+              <label htmlFor="file">
+                <img src={avatar.url || "./avatar.png"} alt="Avatar preview" />
+                Upload an Image
+              </label>
+              <input type="file" id="file" style={{ display: "none" }} onChange={handleAvatar} accept="image/*" />
+              
+              <label htmlFor="register-username">Username</label>
+              <input type="text" id="register-username" placeholder="Username" name="username" aria-invalid={errors.username ? "true" : "false"} />
+              {errors.username && <span className="error">{errors.username}</span>}
+              
+              <label htmlFor="register-email">Email</label>
+              <input type="email" id="register-email" placeholder="Email" name="email" aria-invalid={errors.email ? "true" : "false"} />
+              {errors.email && <span className="error">{errors.email}</span>}
+              
+              <label htmlFor="register-password">Password</label>
+              <input type="password" id="register-password" placeholder="Password" name="password" aria-invalid={errors.password ? "true" : "false"} />
+              {errors.password && <span className="error">{errors.password}</span>}
+              
+              <label htmlFor="register-confirm-password">Confirm Password</label>
+              <input type="password" id="register-confirm-password" placeholder="Confirm Password" name="confirmPassword" aria-invalid={errors.confirmPassword ? "true" : "false"} />
+              {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
+              
+              <button disabled={loading}>{loading ? "Loading" : "Sign Up"}</button>
+            </form>
+          </div>
+        </div>
       </div>
-      <div className="separator"></div>
-      <div className="item">
-        <h2>Create an Account</h2>
-        <form onSubmit={handleRegister}>
-          <label htmlFor="file">
-            <img src={avatar.url || "./avatar.png"} alt="Avatar preview" />
-            Upload an Image
-          </label>
-          <input type="file" id="file" style={{ display: "none" }} onChange={handleAvatar} accept="image/*" />
-          
-          <label htmlFor="register-username">Username</label>
-          <input type="text" id="register-username" placeholder="Username" name="username" aria-invalid={errors.username ? "true" : "false"} />
-          {errors.username && <span className="error">{errors.username}</span>}
-          
-          <label htmlFor="register-email">Email</label>
-          <input type="email" id="register-email" placeholder="Email" name="email" aria-invalid={errors.email ? "true" : "false"} />
-          {errors.email && <span className="error">{errors.email}</span>}
-          
-          <label htmlFor="register-password">Password</label>
-          <input type="password" id="register-password" placeholder="Password" name="password" aria-invalid={errors.password ? "true" : "false"} />
-          {errors.password && <span className="error">{errors.password}</span>}
-          
-          <label htmlFor="register-confirm-password">Confirm Password</label>
-          <input type="password" id="register-confirm-password" placeholder="Confirm Password" name="confirmPassword" aria-invalid={errors.confirmPassword ? "true" : "false"} />
-          {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
-          
-          <button disabled={loading}>{loading ? "Loading" : "Sign Up"}</button>
-        </form>
-      </div>
-    </div>
-    </div>
     </div>
   );
 };

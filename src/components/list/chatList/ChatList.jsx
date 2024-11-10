@@ -13,17 +13,32 @@ const ChatList = () => {
   const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
   const { currentUser } = useUserStore();
-  const { chatId, changeChat, clearSelectedChat } = useChatStore();
+  const { chatId, changeChat, determineBlockStatus } = useChatStore();
   const [input, setInput] = useState("");
 
   useEffect(() => {
+    if (!currentUser?.id) {
+      return;
+    }
+
     const unSubUserChats = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
       const items = res.data()?.chats || [];
       const promises = items.map(async (item) => {
         try {
           const userDocRef = doc(db, "users", item.receiverId);
           const userDocSnap = await getDoc(userDocRef);
-          const user = userDocSnap.data();
+          const userData = {
+            ...userDocSnap.data(),
+            id: item.receiverId
+          };
+
+          // Use the centralized blocking logic
+          const blockStatus = determineBlockStatus(currentUser, userData);
+          const user = {
+            ...userData,
+            // Apply avatar logic based on block status
+            avatar: blockStatus.shouldHideAvatar ? "./avatar.png" : userData.avatar
+          };
 
           const chatDocRef = doc(db, "chats", item.chatId);
           const chatDocSnap = await getDoc(chatDocRef);
@@ -32,7 +47,12 @@ const ChatList = () => {
             ?.filter(msg => !msg.deletedFor?.includes(currentUser.id))
             ?.slice(-1)[0] || null;
 
-          return { ...item, user, lastMessage };
+          return {
+            ...item,
+            user,
+            lastMessage,
+            blockStatus // Store block status for reference
+          };
         } catch (error) {
           console.error("Error fetching chat data:", error);
           return null;
@@ -43,36 +63,10 @@ const ChatList = () => {
       setChats(chatData.filter(chat => chat !== null));
     });
 
-    const unSubChats = onSnapshot(collection(db, "chats"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "modified") {
-          const chatData = change.doc.data();
-          const lastMessage = chatData.messages
-            .filter(msg => !msg.deletedFor?.includes(currentUser.id))
-            .slice(-1)[0];
-
-          setChats((prevChats) => {
-            return prevChats.map((chat) => {
-              if (chat.chatId === change.doc.id) {
-                const isSeen = lastMessage && lastMessage.senderId === currentUser.id || chat.isSeen;
-                return { ...chat, lastMessage, isSeen };
-              }
-              return chat;
-            });
-          });
-        }
-      });
-    });
-
     return () => {
       unSubUserChats();
-      unSubChats();
     };
-  }, [currentUser.id, clearSelectedChat, changeChat]);
-
-  useEffect(() => {
-    clearSelectedChat();
-  }, [clearSelectedChat]);
+  }, [currentUser.id, determineBlockStatus]);
 
   const handleSelect = async (chat) => {
     const updatedChats = chats.map(item =>
@@ -83,7 +77,7 @@ const ChatList = () => {
     const userChatsRef = doc(db, "userchats", currentUser.id);
     try {
       await updateDoc(userChatsRef, {
-        chats: updatedChats.map(({ user, lastMessage, ...rest }) => rest)
+        chats: updatedChats.map(({ user, lastMessage, blockStatus, ...rest }) => rest)
       });
       changeChat(chat.chatId, chat.user);
     } catch (err) {
@@ -101,23 +95,21 @@ const ChatList = () => {
     return lastMessage.text || "";
   };
 
+  // Remove getAvatarUrl function since avatar handling is now done during chat data processing
+
   const sortedChats = chats
     .filter(c => c.user.username.toLowerCase().includes(input.toLowerCase()))
     .sort((a, b) => {
-      // First, sort by the creation time of the chat (for newly added users)
       const aCreatedTime = a.createdAt?.toMillis() || 0;
       const bCreatedTime = b.createdAt?.toMillis() || 0;
       
-      // Then, sort by the last message time
       const aLastMessageTime = a.lastMessage?.createdAt?.toMillis() || 0;
       const bLastMessageTime = b.lastMessage?.createdAt?.toMillis() || 0;
       
-      // If creation times are different, use them for sorting
       if (aCreatedTime !== bCreatedTime) {
         return bCreatedTime - aCreatedTime;
       }
       
-      // If creation times are the same, use last message times
       return bLastMessageTime - aLastMessageTime;
     });
 

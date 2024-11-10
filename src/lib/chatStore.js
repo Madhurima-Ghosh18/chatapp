@@ -11,44 +11,97 @@ export const useChatStore = create((set, get) => ({
   scrollToMessageTimestamp: null,
   isChatSelected: false,
   messages: [],
+  userBlockStatus: null,
+
+  determineBlockStatus: (currentUser, otherUser) => {
+    const isBlockedByReceiver = otherUser.blocked?.includes(currentUser.id) || false;
+    const hasBlockedReceiver = currentUser.blocked?.includes(otherUser.id) || false;
+    
+    return {
+      isCurrentUserBlocked: isBlockedByReceiver,
+      isReceiverBlocked: hasBlockedReceiver,
+      shouldHideAvatar: isBlockedByReceiver && !hasBlockedReceiver,
+      shouldShowDefaultAvatar: isBlockedByReceiver
+    };
+  },
 
   changeChat: (chatId, user) => {
+    // Only proceed if there's both a chatId and user
+    if (!chatId || !user) {
+      return set({
+        chatId: null,
+        user: null,
+        isCurrentUserBlocked: false,
+        isReceiverBlocked: false,
+        userBlockStatus: null,
+        isChatSelected: false,
+      });
+    }
+
     const currentUser = useUserStore.getState().currentUser;
-    if (user.blocked.includes(currentUser.id)) {
-      return set({
-        chatId,
-        user: user,
-        isCurrentUserBlocked: true,
-        isReceiverBlocked: false,
-        isChatSelected: true,
+    const blockStatus = get().determineBlockStatus(currentUser, user);
+
+    set({
+      chatId,
+      user: {
+        ...user,
+        avatar: blockStatus.shouldHideAvatar ? "./avatar.png" : user.avatar
+      },
+      isCurrentUserBlocked: blockStatus.isCurrentUserBlocked,
+      isReceiverBlocked: blockStatus.isReceiverBlocked,
+      userBlockStatus: blockStatus,
+      isChatSelected: true,
+    });
+  },
+
+  clearSelectedChat: () => set({ 
+    chatId: null, 
+    user: null, 
+    isChatSelected: false,
+    userBlockStatus: null,
+    isCurrentUserBlocked: false,
+    isReceiverBlocked: false,
+  }),
+
+  changeBlock: async () => {
+    const state = get();
+    const currentUser = useUserStore.getState().currentUser;
+    
+    if (!state.user) return;
+
+    const newBlockStatus = !state.isReceiverBlocked;
+    
+    try {
+      const userRef = doc(db, "users", currentUser.id);
+      if (newBlockStatus) {
+        await updateDoc(userRef, {
+          blocked: arrayUnion(state.user.id)
+        });
+      } else {
+        await updateDoc(userRef, {
+          blocked: arrayRemove(state.user.id)
+        });
+      }
+
+      const updatedBlockStatus = get().determineBlockStatus(
+        { ...currentUser, blocked: newBlockStatus ? [...(currentUser.blocked || []), state.user.id] : currentUser.blocked?.filter(id => id !== state.user.id) },
+        state.user
+      );
+
+      set({
+        isReceiverBlocked: newBlockStatus,
+        userBlockStatus: updatedBlockStatus,
+        user: {
+          ...state.user,
+          avatar: updatedBlockStatus.shouldHideAvatar ? "./avatar.png" : state.user.avatar
+        }
       });
-    } else if (currentUser.blocked.includes(user.id)) {
-      return set({
-        chatId,
-        user: user,
-        isCurrentUserBlocked: false,
-        isReceiverBlocked: true,
-        isChatSelected: true,
-      });
-    } else {
-      return set({
-        chatId,
-        user,
-        isCurrentUserBlocked: false,
-        isReceiverBlocked: false,
-        isChatSelected: true,
-      });
+    } catch (error) {
+      console.error("Error updating block status:", error);
     }
   },
 
-  clearSelectedChat: () => set({ chatId: null, user: null, isChatSelected: false }),
-
-  changeBlock: () => {
-    set((state) => ({ ...state, isReceiverBlocked: !state.isReceiverBlocked }));
-  },
-
   setScrollToMessageTimestamp: (timestamp) => set({ scrollToMessageTimestamp: timestamp }),
-
   setMessages: (messages) => set({ messages }),
 
   clearChatMessages: async () => {
@@ -76,7 +129,6 @@ export const useChatStore = create((set, get) => ({
       const chatDoc = await getDoc(doc(db, "chats", combinedId));
 
       if (!chatDoc.exists()) {
-        // Create chat document
         await setDoc(doc(db, "chats", combinedId), {
           messages: []
         });
@@ -88,33 +140,33 @@ export const useChatStore = create((set, get) => ({
         createdAt: serverTimestamp()
       };
 
-      // Update userchats for current user
-      const currentUserChatsRef = doc(db, "userchats", currentUser.id);
-      await updateDoc(currentUserChatsRef, {
-        chats: arrayRemove(chatData)
-      });
-      await updateDoc(currentUserChatsRef, {
-        chats: arrayUnion({
-          ...chatData,
-          createdAt: serverTimestamp() // Update timestamp
-        })
-      });
+      // Update userchats for both users
+      const updateUserChats = async (userRef, receiverId) => {
+        await updateDoc(userRef, {
+          chats: arrayRemove({ ...chatData, receiverId })
+        });
+        await updateDoc(userRef, {
+          chats: arrayUnion({
+            ...chatData,
+            receiverId,
+            createdAt: serverTimestamp()
+          })
+        });
+      };
 
-      // Update userchats for selected user
-      const selectedUserChatsRef = doc(db, "userchats", selectedUser.id);
-      await updateDoc(selectedUserChatsRef, {
-        chats: arrayRemove({...chatData, receiverId: currentUser.id})
-      });
-      await updateDoc(selectedUserChatsRef, {
-        chats: arrayUnion({
-          ...chatData,
-          receiverId: currentUser.id,
-          createdAt: serverTimestamp() // Update timestamp
-        })
-      });
+      await Promise.all([
+        updateUserChats(doc(db, "userchats", currentUser.id), selectedUser.id),
+        updateUserChats(doc(db, "userchats", selectedUser.id), currentUser.id)
+      ]);
 
-      // Select the new or existing chat
-      get().changeChat(combinedId, selectedUser);
+      // Only change chat if both chatId and selectedUser are valid
+      if (combinedId && selectedUser) {
+        const blockStatus = get().determineBlockStatus(currentUser, selectedUser);
+        get().changeChat(combinedId, {
+          ...selectedUser,
+          avatar: blockStatus.shouldHideAvatar ? "./avatar.png" : selectedUser.avatar
+        });
+      }
     } catch (error) {
       console.error("Error creating chat:", error);
     }

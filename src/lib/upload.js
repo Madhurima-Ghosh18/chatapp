@@ -36,7 +36,7 @@
 // };
 
 // export default upload;
-// Importing Cloudinary is no longer necessary since we're using a direct API call
+
 
 const upload = async (file) => {
   const date = new Date();
@@ -44,7 +44,7 @@ const upload = async (file) => {
   let folder = 'others/';
 
   // Organizing files based on their type
-  if (['jpg', 'jpeg', 'png', 'svg', 'gif', 'webp'].includes(fileExtension)) {
+  if (['jpg', 'jpeg', 'png', 'svg', 'gif', 'webp','jfif'].includes(fileExtension)) {
     folder = 'images/';
   } else if (['pdf', 'doc', 'docx', 'ppt', 'txt', 'xls', 'xlsx'].includes(fileExtension)) {
     folder = 'documents/';

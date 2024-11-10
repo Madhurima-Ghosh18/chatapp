@@ -25,7 +25,7 @@ const Chat = () => {
   const [lastSeen, setLastSeen] = useState(null);
   const [deleteOptions, setDeleteOptions] = useState(null);
 
-  useEffect(() => {
+    useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
 
@@ -136,7 +136,6 @@ const Chat = () => {
         messages: arrayUnion(messageData),
       });
       
-      // Update last message in userchats
       await updateLastMessage(chatId, [messageData]);
     } catch (err) {
       console.error("Error sending message:", err);
@@ -163,10 +162,10 @@ const Chat = () => {
 
   const formatLastSeen = (date) => {
     if (isCurrentUserBlocked) {
-      return "Last seen: Unknown";
+      return "Last seen: ";
     }
     if (isReceiverBlocked) {
-      return "Last seen: Unavailable";
+      return "Last seen: ";
     }
 
     if (!date) return "Last seen: Unknown";
@@ -210,7 +209,6 @@ const Chat = () => {
         );
         await updateDoc(chatDocRef, { messages: updatedMessages });
         
-        // Update last message in userchats
         await updateLastMessage(chatId, updatedMessages);
       }
     } catch (error) {
@@ -227,7 +225,6 @@ const Chat = () => {
         const updatedMessages = chatDoc.data().messages.filter(msg => msg.id !== messageId);
         await updateDoc(chatDocRef, { messages: updatedMessages });
         
-        // Update last message in userchats
         await updateLastMessage(chatId, updatedMessages);
       }
     } catch (error) {
@@ -254,7 +251,7 @@ const Chat = () => {
       <div className="chat">
         <div className="top">
           <div className="user">
-            <img src={user?.avatar || "./avatar.png"} alt="" />
+          <img src={user?.avatar || "./avatar.png"} alt="" />
             <div className="texts">
               <span>{user?.username}</span>
               <p>{formatLastSeen(lastSeen)}</p>

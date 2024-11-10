@@ -106,10 +106,10 @@ const Detail = () => {
 
   const formatLastSeen = (date) => {
     if (isCurrentUserBlocked) {
-      return "Last seen: Unknown";
+      return "Last seen: ";
     }
     if (isReceiverBlocked) {
-      return "Last seen: Unavailable";
+      return "Last seen: ";
     }
 
     if (!date) return "Last seen: Unknown";
@@ -144,7 +144,7 @@ const Detail = () => {
     <div className={`Detail ${theme}`}>
       <div className="detail">
         <div className="user">
-          <img src={user?.avatar || "./avatar.png"} alt="" />
+        <img src={user?.avatar || "./avatar.png"} alt="" />
           <h2>{user?.username}</h2>
           <p>{formatLastSeen(lastSeen)}</p>
         </div>
