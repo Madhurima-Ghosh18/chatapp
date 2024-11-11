@@ -124,7 +124,7 @@ const Login = () => {
         </button>
         <div className="login-content">
           <div className="item">
-            <h2>Welcome back!</h2>
+            <h2>Welcome back to Chime!</h2>
             <form onSubmit={handleLogin}>
               <label htmlFor="login-email">Email</label>
               <input type="email" id="login-email" placeholder="Email" name="email" aria-invalid={errors.email ? "true" : "false"} />
