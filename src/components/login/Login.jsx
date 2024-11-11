@@ -136,7 +136,6 @@ const Login = () => {
               
               <button disabled={loading}>{loading ? "Loading" : "Sign In"}</button>
             </form>
-            <a href="#" className="forgot-password">Forgot Password?</a>
           </div>
           <div className="separator"></div>
           <div className="item">
