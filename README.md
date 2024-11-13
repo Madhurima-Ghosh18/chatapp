@@ -28,3 +28,20 @@ A real-time chat application built with React and Firebase, featuring user authe
 * Tailwind CSS: Utility-first CSS framework for styling.
   
 * Vite: Frontend build tool for a fast development environment.
+
+* Zustand: State management library for efficient data handling.
+
+* Cloudinary: Cloud-based storage service for storing and serving images and documents.
+
+
+## Getting Started ##
+
+To run this project locally, follow these steps:
+
+## Prerequisites ##
+
+* Node.js and npm installed
+
+* Firebase account and project setup
+
+* Cloudinary account for image and document storage
